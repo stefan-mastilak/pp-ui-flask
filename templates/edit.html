@@ -1,0 +1,254 @@
+<!-- templates/edit.html -->
+
+<!-- MODAL PAGE TO DISPLAY DATA FOR SPECIFIC PROJECT -->
+<html lang="en">
+
+<!-- CURRENT PERIOD DATA FROM SEVERA RELATED TO THE PROJECT -->
+<h1 style="font-size: 20px; padding-top: 15px; padding-bottom: 10px">Gjeldende periode</h1>
+<br>
+
+<!--------------------------------------------------------->
+<!---------------- CURRENT PERIOD TABLE ------------------->
+<!--------------------------------------------------------->
+<table class="responsive-table" id="project_workhours_period_table_{{guid}}">
+    <thead class="sortable text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+            <th class="px-6 py-3" title="Info: Worktype code">Produkt</th>
+            <th class="px-6 py-3" title="Info: Worktype name">Arbeidstype</th>
+            <th class="px-6 py-3" title="Info: Current allocation">Tildeling</th>
+            <th class="px-6 py-3" title="Info: Set new allocation and click apply">Oppdater Tildelt verdi</th>
+            <th class="px-6 py-3" title="Info: Contract value x Allocation">Tildelt verdi</th>
+            <th class="px-6 py-3" title="Info: Deliverable value - Booked value">Gjenværende inntekt</th>
+            <th class="px-6 py-3" title="Info: Number of hours for current period">Severa timer</th>
+            <th class="px-6 py-3" title="Info: Number of hours x Unit price">Inntekt denne måneden</th>
+            <th class="px-6 py-3" title="Info: Set new value and click apply">Oppdater inntekt denne måneden</th>
+         </tr>
+    </thead>
+
+    <!-- Show "no data found" if there's no project_workhours and no worktypes in Severa -->
+    {% if not project_workhours and not worktypes %}
+        <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <td colspan="9" style="padding: 40px">Ingen data funnet i Severa</td>
+            </tr>
+        </tbody>
+    {% endif %}
+
+    <!-- Show "no worktypes found" if there's no worktypes in Severa -->
+    {% if not worktypes %}
+        <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <td colspan="9" style="padding: 30px">Ingen arbeidstyper funnet<br>
+                    Vennligst oppdater jobbtyper i Severa (jobbtyper for prosjektet)</td>
+            </tr>
+        </tbody>
+        <script>disableSubmitButton('{{guid}}');</script>
+    {% endif %}
+
+    <!-- Iterate through all unique worktype codes available for the project -->
+    {% for worktype_code in worktypes|map(attribute='code')|unique|list %}
+
+        <!-- filter out "feil" worktype - not valid for periodisation (it has code 1)-->
+        {% if worktype_code not in ['1', 1] %}
+            <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-green-100 dark:hover:bg-gray-600">
+                {% set sum_worktype_hours = period_workhours|selectattr('workType.code', 'equalto', worktype_code)|map(attribute='quantity')|sum %}
+                {% set worktype_name = worktypes|selectattr('code', 'equalto', worktype_code)|map(attribute='name')|first|default('none') %}
+
+                {% if finance_data.get(worktype_code) %}
+                    {% set historical_value = finance_data.get(worktype_code).get('booked') %}
+                {% else %}
+                    {% set historical_value = 0 %}
+                {% endif %}
+
+                {% if allocation %}
+                    {% if allocation.get(worktype_code) %}
+                        {% set current_alloc = allocation.get(worktype_code) %}
+                    {% else %}
+                        {% set current_alloc = 0 %}
+                    {% endif %}
+                {% else %}
+                    {% set current_alloc = 0 %}
+                {% endif %}
+
+                <!-- Calculate fields based on existing value of allocated money to product fetched from BQ table -->
+                <!-- NOTE: This will calculate also allocation percentage value and remaining revenue
+                automatically based on the allocated amount of money fetched from BQ allocation table -->
+                <script>
+                    calculateDefaultValuesBasedOnAlloc({{pid}}, {{current_alloc}}, {{worktype_code}}, {{contract_value}}, {{historical_value}});
+                </script>
+
+                <!-- Product code -->
+                <td style="white-space:nowrap; width: 11%">{{worktype_code}}</td>
+
+                <!-- Product name -->
+                <td>{{worktype_name}}</td>
+
+                <!-- Current Percentage allocation -->
+                <td id="current_allocation_{{pid}}_{{worktype_code}}">0<span> %</span></td>
+
+                <!-- Update allocation -->
+                <td class="px-6 py-2" align='center' style="white-space:nowrap; width: 16%">
+
+                    <!-- amount input field -->
+                    <input id="allocation_amount_{{pid}}_{{worktype_code}}"
+                           type="number"
+                           step="1"
+                           min="0"
+                           placeholder=" sett"
+                           style="width:49%; border-radius: 5px; border: 1px solid #10AB4D; text-align: center;"
+                           oninput="this.value = !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null">
+
+                    <!-- apply button -->
+                    <input type=submit
+                           value="søke om"
+                           name="{{guid}}"
+                           class="hover:text-green-700 hover:bg-gray-300"
+                           style="width: 49%; border-radius: 5px; border: 1px solid #10AB4D; cursor: pointer;"
+                           onclick="calculateInputAlloc(
+                                        {{pid}},
+                                        {{worktype_code}},
+                                        {{contract_value}},
+                                        {{historical_value}}
+                                        );
+                                   checkMaxAllocation(
+                                        name
+                                        );
+                                   calculateSummaryFields(
+                                        '{{guid}}',
+                                        {{pid}},
+                                        '{{currency}}'
+                                        );">
+                </td>
+
+                <!-- Deliverable value for the current period -->
+                <td id="deliverable_val_{{pid}}_{{worktype_code}}">{{current_alloc}}<span> {{currency}}</span></td>
+
+                <!-- Remaining revenue for the current period -->
+                <td id="remaining_rev_{{pid}}_{{worktype_code}}">0<span> {{currency}}</span></td>
+
+                <!-- Number of hours for the current period -->
+                <td>{{sum_worktype_hours}}</td>
+
+                <!-- Revenue for the current period -->
+                <td id="revenue_tm_{{pid}}_{{worktype_code}}">
+                    {% set rev_this_month = sum_worktype_hours * period_workhours|selectattr('workType.code', 'equalto', worktype_code)|map(attribute='unitPrice.amount')|first|default(0) %}
+
+                    {% if pp_history_data[worktype_code] %}
+                        {% set already_submitted_rev_this_month = pp_history_data[worktype_code].amount|default(0) %}
+                    {% else %}
+                        {% set already_submitted_rev_this_month = 0 %}
+                    {% endif %}
+
+                    {% if already_submitted_rev_this_month %}
+                        {{already_submitted_rev_this_month}}
+                    {% else %}
+                        {{rev_this_month}}
+                    {% endif %}
+                    <script>
+                        var rev_el = document.getElementById("revenue_tm_" + {{pid}} + "_" + {{worktype_code}});
+                        var rounded_rev = roundAmountNum(rev_el.textContent);
+                        rev_el.textContent = rounded_rev;
+                        var span_el = document.createElement('span');
+                        var currency = "{{currency}}";
+                        span_el.textContent = " " + currency;
+                        rev_el.appendChild(span_el);
+                    </script>
+                </td>
+
+                <!-- Update revenue -->
+                <td class="px-6 py-2" align='center' style="white-space:nowrap; width: 16%">
+                    <input id="revenue_tm_input_{{pid}}_{{worktype_code}}"
+                           type="number"
+                           pattern="-?[0-9]+"
+                           placeholder="legg til"
+                           style="width:49%; border-radius: 5px; border: 1px solid #10AB4D; text-align: center;">
+                    <input type=submit
+                           value="søke om"
+                           class="hover:text-green-700 hover:bg-gray-300"
+                           name="{{guid}}"
+                           style="width: 49%; border-radius: 5px; border: 1px solid #10AB4D; cursor: pointer;"
+                           onclick="CalculateInputRevenue({{pid}},{{worktype_code}});
+                            calculateSummaryFields('{{guid}}',{{pid}},'{{currency}}');">
+                </td>
+            </tr>
+        {% endif %}
+    {%endfor%}
+    <!-- Summary row -->
+        <script>calculateSummaryFields('{{guid}}', {{pid}}, '{{currency}}');</script>
+        <tr class="bg-green-200 border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-green-100 dark:hover:bg-gray-600">
+        <td colspan="1" style="padding: 10px; font-weight: bold">Sammendrag</td>
+        <td><!-- nothing to sum up --><i class="fa fa-ban" aria-hidden="true"></i></td>
+        <td id="sum_current_alloc_{{pid}}" style="padding: 10px; font-weight: bold">0 %</td>
+        <td><!-- nothing to sum up --><i class="fa fa-ban" aria-hidden="true"></i></td>
+        <td id="sum_deliverable_val_{{pid}}" style="padding: 10px; font-weight: bold">0 <span>{{currency}}</span></td>
+        <td id="sum_remaining_rev_{{pid}}" style="padding: 10px; font-weight: bold">0 <span>{{currency}}</span></td>
+        <td id="sum_severa_hours_{{pid}}" style="padding: 10px; font-weight: bold">0</td>
+        <td id="sum_revenue_tm_{{pid}}" style="padding: 10px; font-weight: bold">0 <span>{{currency}}</span></td>
+        <td><!-- nothing to sum up --><i class="fa fa-ban" aria-hidden="true"></i></td>
+    </tbody>
+</table>
+
+<!---------------------------------------------------------------->
+<!---------------- ALL DATA (HISTORICAL) TABLE ------------------->
+<!---------------------------------------------------------------->
+<br>
+<button id="show_historical_data_button_{{pid}}"
+        style="font-size: 20px; padding-top: 8px; padding-bottom: 10px"
+        onMouseOver="this.style.color='#10AB4D'"
+        onMouseOut="this.style.color='#6b7280'"
+        name="{{pid}}"
+        onclick="showHistoricalData(name)">Vis Historiske Data</button>
+<br><br>
+
+<!-- This table is initially hidden and will be shown when the button is clicked -->
+<table class="responsive-table project_workhours_history_table"
+       id="history_table_{{pid}}"
+       style="display: none">
+    <thead class="sortable text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+            <th class="px-6 py-3">Produkt</th>
+            <th class="px-6 py-3 hover:text-green-800"
+                onclick="sortTable('history_table_{{pid}}', 2, false)"
+                style="cursor: pointer;">
+                <i class="fas fa-sort" style="white-space: nowrap;"></i> Arbeidstype</th>
+            <th class="px-6 py-3 hover:text-green-800"
+                onclick="sortTable('history_table_{{pid}}', 3, false)"
+                style="cursor: pointer;">
+                <i class="fas fa-sort" style="white-space: nowrap;"></i> Beskrivelse</th>
+            <th class="px-6 py-3">Pris/enhet</th>
+            <th class="px-6 py-3">Beløp</th>
+            <th class="px-6 py-3 hover:text-green-800"
+                data-type="date"
+                data-field="created_date"
+                onclick="sortTable('history_table_{{pid}}', 6)"
+                style="cursor: pointer; white-space: nowrap;"
+                title="click to sort">
+                <i class="fas fa-sort" style="white-space: nowrap;"></i> Opprettet
+            </th>
+            <th class="px-6 py-3" data-field="created_time">Tid</th>
+            <th class="px-6 py-3">Opprettet av</th>
+         </tr>
+    </thead>
+    <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+    {% for row in project_workhours %}
+    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-green-100 dark:hover:bg-gray-600">
+        <td class="px-6 py-2">{{row.workType.code}}</td>
+        <td class="px-6 py-2">{{row.workType.name}}</td>
+        <td class="px-6 py-2">{{row.description}}</td>
+        <td class="px-6 py-2">{{row.unitPrice.amount}} {{row.unitPrice.currencyCode}}</td>
+        <td class="px-6 py-2">{{row.quantity}}</td>
+        {% set date, time = row.createdDateTime.split('T')%}
+        <td class="px-6 py-2">{{date}}</td>
+        <td class="px-6 py-2">{{time}}</td>
+        <td class="px-6 py-2">{{row.createdBy.name}}</td>
+    </tr>
+    {% endfor %}
+    {% if not project_workhours %}
+        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <td colspan="8" style="padding: 40px">Ingen data funnet i Severa</td>
+        </tr>
+    {% endif %}
+    </tbody>
+</table>
+</html>

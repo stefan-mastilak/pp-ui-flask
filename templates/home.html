@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Prosjekt Periodisering</title>
+    <meta name="author" content="name">
+    <meta name="description" content="description here">
+    <meta name="keywords" content="keywords,here">
+
+    <!-- CUSTOM CSS -->
+    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}"> -->
+    <!-- This CSS import is at the bottom of the home.html script after everything is loaded into the DOM -->
+
+    <!-- BOOTSTRAP -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css"/>
+
+    <!-- AJAX -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+    <!-- JS -->
+    <script src="{{url_for('static', filename='js/javascript.js')}}"></script>
+
+</head>
+
+<body class="bg-gray-800 font-sans leading-normal tracking-normal mt-16">
+
+<!-- HEADER -->
+{% include 'home_header.html' %}
+<!-- /HEADER -->
+
+<main>
+    <div class="flex flex-col md:flex-row">
+        <section>
+            <div id="main" class="main-content flex-1 bg-gray-100 mt-12 md:mt-2 pb-24 md:pb-5">
+
+                <div class="bg-gray-800 pt-1">
+                    <div class="rounded-tl-3xl bg-gradient-to-r from-gray-900 to-gray-800 p-4 shadow text-2xl text-white">
+                        <h1 class="font-bold pl-2">
+                            Oversikt
+                            <span class="text-lg text-gray-400 hover:text-gray-200"
+                                  id="current_month"
+                                  style="float: right; padding-right: 20px"> Gjeldende periode: {{period_name}}
+                            </span>
+                        </h1>
+                    </div>
+                </div>
+
+                <div class="flex flex-row flex-wrap flex-grow mt-0">
+                    <div class="w-full md:w-1/1 xl:w-1/1 p-6">
+
+                        <!------------------------>
+                        <!-- PROJECT TABLE CARD -->
+                        <!------------------------>
+                        <div class="bg-white border-transparent rounded-lg shadow-xl">
+                            <div class="header-container bg-gradient-to-b from-gray-900 to-gray-700 uppercase text-gray-800 border-b-2 border-gray-300 rounded-tl-lg rounded-tr-lg p-2 flex justify-between items-center">
+                                <h2 class="font-bold uppercase text-white" style="padding-left:15px">Prosjekter</h2>
+
+                                <div style="padding-right: 4%">
+                                    <button id="view_all_projects_button"
+                                            class="view-all-button text-gray-300 hover:text-green-600 hidden"
+                                            style="color: '#10AB4D'"
+                                            onclick="toggleShowHideProjects(this);">Vise skjult<i class="fas fa-eye hover:text-green-600" style="margin-left: 10px"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Show "View all" button if there are some hidden projects -->
+                                {% if hidden_project_ids %}
+                                    <script>
+                                        enableViewAllButton();
+                                    </script>
+                                {% endif %}
+
+                            </div>
+
+                            <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                                <!----------->
+                                <!-- TABLE -->
+                                <!----------->
+                                <table id="sortable"
+                                       class="sortable w-full text-sm text-left text-gray-500 dark:text-gray-400"
+                                       style="table-layout: fixed;">
+
+                                    <thead class="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400"
+                                           style="font-weight: bold; height: 60px;">
+                                        <tr>
+                                            <th id="project_name_header"
+                                                scope="col"
+                                                class="px-6 py-3 hover:text-green-800"
+                                                onclick="sortTable('sortable', 0, false)"
+                                                data-type="text"
+                                                style="width: 30%; cursor: pointer;">
+                                                <i class="fas fa-sort"></i>
+                                                    Prosjektnavn
+                                            </th>
+                                            <th id="project_id_header"
+                                                scope="col"
+                                                class="px-6 py-3 hover:text-green-800"
+                                                onclick="sortTable('sortable', 1, true)"
+                                                style="cursor: pointer; width: 7%;"
+                                                data-type="number">
+                                                <i class="fas fa-sort"></i>
+                                                    ID
+                                            </th>
+                                            <th id="project_status_header"
+                                                scope="col"
+                                                class="px-6 py-3 hover:text-green-800"
+                                                onclick="sortTable('sortable', 2, false)"
+                                                style="cursor: pointer; white-space: nowrap; width: 10%;"
+                                                data-type="text">
+                                                <i class="fas fa-sort"></i>
+                                                    Prosjekt status
+                                            </th>
+                                            <th id="project_contract_value_header"
+                                                scope="col"
+                                                class="px-6 py-3 hover:text-green-800"
+                                                onclick="sortTable('sortable', 3, true)"
+                                                style="cursor: pointer; width: 10%;"
+                                                data-type="text">
+                                                <i class="fas fa-sort"></i>
+                                                    Kontrakt
+                                            </th>
+                                            <th id="project_start_date_header"
+                                                scope="col"
+                                                class="px-6 py-3 hover:text-green-800"
+                                                data-type="date"
+                                                data-field="created_date"
+                                                onclick="sortTable('sortable', 4, false)"
+                                                style="cursor: pointer; width: 9%">
+                                                <i class="fas fa-sort"></i>
+                                                    Startdato
+                                            </th>
+                                            <th id="edit_status"
+                                                scope="col"
+                                                class="px-2 py-3"
+                                                style="width: 10%;">
+                                                Status
+                                            </th>
+                                            <th id="project_actions_header"
+                                                scope="col"
+                                                class="px-6 py-3"
+                                                style="width: 13%; text-align: center; padding-right: 40px">
+                                                Handling
+                                            </th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <!-- Show "no data found" if there's no project data in Severa for the user -->
+                                        {% if not project_data %}
+                                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                            <td class="center-text"
+                                                colspan="7"
+                                                style="padding: 80px; text-align: center">Ingen data for bruker {{user_name}}</td>
+                                        </tr>
+                                        {% endif %}
+
+                                        {% for project in project_data %}
+                                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-green-100 dark:hover:bg-gray-600">
+
+                                            <th scope="row" class="px-6 py-3">
+                                                <!------------------>
+                                                <!-- PROJECT NAME -->
+                                                <!------------------>
+                                                {{project.name}}
+                                            </th>
+                                            <td class="px-6 py-3">
+                                                <!---------------->
+                                                <!-- PROJECT ID -->
+                                                <!---------------->
+                                                {{project.number}}
+                                            </td>
+                                            <td class="px-6 py-3">
+                                                <!-------------------->
+                                                <!-- PROJECT STATUS -->
+                                                <!-------------------->
+                                                {{project.projectStatus.name}}
+                                            </td>
+                                            <td class="px-6 py-3">
+                                                <!-------------------->
+                                                <!-- CONTRACT VALUE -->
+                                                <!-------------------->
+                                                {{project.expectedValue.amount}}
+                                                <span style="color: #565b66;">{{project.expectedValue.currencyCode}}</span>
+                                            </td>
+                                            <td class="px-6 py-3">
+                                                <!------------------------>
+                                                <!-- PROJECT START DATE -->
+                                                <!------------------------>
+                                                {{project.startDate}}
+                                            </td>
+                                            <td class="px-6 py-3">
+                                                <!------------------>
+                                                <!----- STATUS ----->
+                                                <!------------------>
+                                                <div class="status-container" style="text-align: left;">
+                                                    <i id="pending_icon_{{project.number}}"
+                                                       class="fa fa-question-circle"
+                                                       style="font-size: 22px;"
+                                                       title="not submitted"></i>
+
+                                                    <i id="submitted_icon_{{project.number}}"
+                                                       class="fa fa-check-circle"
+                                                       style="font-size: 22px; color: #10AB4D; visibility: hidden;"
+                                                        title="submitted"></i>
+                                                    {% if project.number in edited_projects %}
+                                                        <script>
+                                                            enableIndicator({{project.number}}, 'submitted');
+                                                        </script>
+                                                    {% endif %}
+
+                                                    <i id="hidden_icon_{{project.number}}"
+                                                       class="fa fa-eye-slash hidden-project-icon"
+                                                       style="font-size: 22px; color: orange; visibility: hidden;"
+                                                       title="hidden"></i>
+                                                    {% if project.number in hidden_project_ids %}
+                                                        <script>
+                                                            enableIndicator({{project.number}}, 'hidden');
+                                                        </script>
+                                                    {% endif %}
+                                                </div>
+                                                <!------------------->
+                                                <!----- /STATUS ----->
+                                                <!------------------->
+                                            </td>
+                                            <td class="px-6 py-3">
+                                                <div class="project-action-buttons-div" style="text-align: left; padding-right: 30px;">
+                                                    <button id="edit_project_button_{{project.number}}"
+                                                            data-guid="{{project.guid}}"
+                                                            data-pid="{{project.number}}"
+                                                            data-cv="{{project.expectedValue.amount}}"
+                                                            data-cc="{{project.expectedValue.currencyCode}}"
+                                                            data-period-idx="{{period_idx}}"
+                                                            data-year="{{year}}"
+                                                            data-period-start-ts="{{period_start_ts}}"
+                                                            data-period-end-ts="{{period_end_ts}}"
+                                                            class="edit_project btn btn-success to-show-spinner hover:text-green-600"
+                                                            style="padding-right: 10px;">
+                                                        <i class="fas fa-edit fa-fw fa-xl" style="padding-right: 3px;"></i>Rediger
+                                                    </button>
+                                                    <button id="hide_project_button_{{project.number}}"
+                                                            data-pid="{{project.number}}"
+                                                            data-ue="{{user_email}}"
+                                                            onclick="showHideModal({{project.number}});"
+                                                            class="hide_project btn btn-danger to-show-spinner hover:text-green-600"
+                                                            style="margin-left: 0px">
+                                                        <i class="fa fa-eye-slash" aria-hidden="true" style="padding-right: 3px;"></i>Skjul
+                                                    </button>
+                                                </div>
+
+                                                <!------------------------->
+                                                <!-- HIDE PROJECT MODAL --->
+                                                <!------------------------->
+                                                {% with pid=project.number, user_email=user_email %}
+                                                    {% include 'modal_hide.html' %}
+                                                {% endwith %}
+                                                <!-------------------------->
+                                                <!-- /HIDE PROJECT MODAL --->
+                                                <!-------------------------->
+
+                                                <!------------------------->
+                                                <!-- CONFIRM HIDE MODAL --->
+                                                <!------------------------->
+                                                {% with pid=project.number, project_name=project.name %}
+                                                    {% include 'modal_confirm_hide.html' %}
+                                                {% endwith %}
+                                                <!------------------------->
+                                                <!-- /CONFIRM HIDE MODAL -->
+                                                <!------------------------->
+
+                                                <!-------------------------->
+                                                <!-- CONFIRM UNHIDE MODAL -->
+                                                <!-------------------------->
+                                                {% with pid=project.number, project_name=project.name, user_email=user_email %}
+                                                    {% include 'modal_confirm_unhide.html' %}
+                                                {% endwith %}
+                                                <!-------------------------->
+                                                <!-- /CONFIRM UNHIDE MODAL -->
+                                                <!-------------------------->
+
+                                                <!------------------------->
+                                                <!-- EDIT PROJECT MODAL --->
+                                                <!------------------------->
+                                                <div class="modal-overlay" id="submit-overlay-{{project.guid}}">
+                                                    <div id="submit_modal_{{project.guid}}" class="modal fade">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header text-center d-block"
+                                                                 style="border-top-left-radius: 6px; border-top-right-radius: 6px;">
+                                                                    <button id="close_submit_modal_btn"
+                                                                            name="{{project.guid}}"
+                                                                            onclick="closeSubmitModal(name);closeEditModal(name);"
+                                                                            type="button"
+                                                                            class="close_edit_project_modal_btn"
+                                                                            style="float: right;">
+                                                                        <i class="fa fa-times"
+                                                                           style="color: #BDBDBD; float: right; font-size: 22px; padding-right: 8px"
+                                                                           onMouseOver="this.style.color='#EF4444'"
+                                                                           onMouseOut="this.style.color='#BDBDBD'"></i>
+                                                                    </button>
+                                                                    <h2 style="margin-left: 30px">{{project.name}}</h2>
+                                                                </div>
+
+                                                                <div class="modal-body-submit-{{project.guid}} modal-body">
+                                                                <!---------- EDIT PROJECT AJAX LOADER ----------->
+                                                                <!---------- (static/js/javascript.js) ---------->
+                                                                </div>
+                                                                    <div class="modal-footer text-center">
+                                                                        <button id="ok_submit_modal_btn"
+                                                                                name="{{project.guid}}"
+                                                                                type="button"
+                                                                                class="btn btn-default edit-modal-button okay_submit_project_periodisation"
+                                                                                onclick="closeSubmitModal(name);clearSearchInput()"
+                                                                                onMouseOver="this.style.color='#10AB4D'"
+                                                                                onMouseOut="this.style.color='white'">Ok</button>
+                                                                    </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!----------------------------->
+                                                <!-- END /EDIT PROJECT MODAL -->
+                                                <!----------------------------->
+
+                                                <!----------------------------->
+                                                <!------- SUBMIT MODAL -------->
+                                                <!----------------------------->
+                                                <div class="modal-overlay" id="edit-overlay-{{project.guid}}">
+                                                    <div id="edit_project_modal_{{project.guid}}"
+                                                         class="modal fade">
+
+                                                        <!-- INCLUDE MAX ALLOCATION WARNING -->
+                                                        <div class="modal-overlay" id="max-alloc-overlay-{{project.guid}}">
+                                                            <div class="modal modal-warning" id="max-allocation-info-modal-{{project.guid}}">
+                                                                {% with guid=project.guid %}
+                                                                    {% include 'modal_allocation_limit.html' %}
+                                                                {% endwith %}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header text-center d-block"
+                                                                     style="border-top-left-radius: 6px; border-top-right-radius: 6px;">
+                                                                    <button name="{{project.guid}}"
+                                                                            onclick="closeEditModal(name);enableSubmitButton(name)"
+                                                                            type="button"
+                                                                            class="close_edit_project_modal_btn"
+                                                                            style="float: right;">
+                                                                        <i class="fa fa-times"
+                                                                           style="color: #BDBDBD; float: right; font-size: 22px; padding-right: 8px"
+                                                                           onMouseOver="this.style.color='orange'"
+                                                                           onMouseOut="this.style.color='#BDBDBD'"></i>
+                                                                    </button>
+                                                                    <h2 style="margin-left: 30px">{{project.name}}</h2>
+                                                                </div>
+
+                                                                <div class="modal-body-{{project.guid}} modal-body">
+                                                                    <!------ SUBMIT PERIODISATION AJAX LOADER ------->
+                                                                    <!---------- (static/js/javascript.js) ---------->
+                                                                </div>
+                                                                <div class="modal-footer text-center">
+                                                                    <button id="submit_changes_btn_{{project.guid}}"
+                                                                            data-guid="{{project.guid}}"
+                                                                            data-pid="{{project.number}}"
+                                                                            data-ue="{{user_email}}"
+                                                                            data-map="{{mappings}}"
+                                                                            data-period-idx="{{period_idx}}"
+                                                                            type="button"
+                                                                            name="{{project.guid}}"
+                                                                            onclick="closeEditModal(name);"
+                                                                            class="btn btn-success submit_periodisation to-show-spinner edit-modal-button"
+                                                                            onMouseOver="this.style.color='#10AB4D'"
+                                                                            onMouseOut="this.style.color='white'">Send inn</button>
+                                                                    <button id="cancel_changes_btn"
+                                                                            name="{{project.guid}}"
+                                                                            type="button"
+                                                                            class="btn btn-default cancel_changes_project_periodisation edit-modal-button"
+                                                                            onclick="closeEditModal(name);clearSearchInput();enableSubmitButton(name)"
+                                                                            onMouseOver="this.style.color='orange'"
+                                                                            onMouseOut="this.style.color='white'">Avbryt</button>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!----------------------------->
+                                                <!----- END /SUBMIT MODAL ----->
+                                                <!----------------------------->
+                                                </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <!---------------->
+                                <!-- END /TABLE -->
+                                <!---------------->
+                                </div>
+                            </div>
+                        </div>
+
+                        {% include 'modal_error.html' %}
+
+                        <!-------------------->
+                        <!--END /TABLE CARD -->
+                        <!-------------------->
+                    </div>
+                </div>
+        </section>
+    </div>
+</main>
+</body>
+
+<!-- load styles at the bottom - after everything is loaded into the DOM -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+
+<!-- Mark as hidden projects that has been hidden by the user -->
+<!-- Disable back button on browser -->
+<script>
+    markHiddenProjects({{hidden_project_ids}}, '{{user_email}}');
+    disableBack();
+</script>
+
+</html>

@@ -1,0 +1,63 @@
+<!-- templates/submit.html -->
+
+<!-- MODAL FOR SUBMITTING PROJECT PERIODISATION -->
+<html lang="en">
+
+<!-- Add content to submit page -->
+{% if pp_data %}
+    <h2 style="color: #111827; padding-top:25px;">Periodisering lagret</h2>
+    <i class="fa fa-check-circle" style="font-size: 50px; padding-top:25px; padding-bottom:25px; color: #10AB4D"></i>
+    <!-- enable done icon and remove pending icon -->
+    <script>
+        enableIndicator({{pid}}, 'submitted');
+    </script>
+
+{% else %}
+    <h2 style="color: #111827; padding-top:25px;">Periodisering ikke lagret</h2>
+    <i class="fa fa-times-circle" style="font-size: 50px; padding-top:25px; padding-bottom:25px; color: #EF4444"></i>
+{% endif %}
+
+<table class="responsive-table" id="summary_periodisation_table_{{guid}}">
+    <thead class="sortable text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+            <th class="px-6 py-3">Prosjekt</th>
+            <th class="px-6 py-3">Produkt</th>
+            <th class="px-6 py-3">Tildeling</th>
+            <th class="px-6 py-3">Dato</th>
+            <th class="px-6 py-3">År</th>
+            <th class="px-6 py-3">Periode</th>
+            <th class="px-6 py-3">Beløp</th>
+            <th class="px-6 py-3">Debet</th>
+            <th class="px-6 py-3">Kredit</th>
+            <th class="px-6 py-3">Ansatte</th>
+            <th class="px-6 py-3">Avdeling</th>
+            <th class="px-6 py-3">Opprettet</th>
+         </tr>
+    </thead>
+    <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+    <!-- Show "no data found" if there's no pp_data -->
+    {% if not pp_data %}
+    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+        <td colspan="12" style="padding: 30px">Ingen data å sende inn for periodisering</td>
+    </tr>
+    {% endif %}
+
+    {% for pp in pp_data %}
+        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <td class="px-6 py-2">{{pid}}</td>
+            <td class="px-6 py-2">{{pp.Produkt}}</td>
+            <td class="px-6 py-2">{{pp.Tildeling}}</td>
+            <td class="px-6 py-2">{{pp.Date}}</td>
+            <td class="px-6 py-2">{{pp.Year}}</td>
+            <td class="px-6 py-2">{{pp.Period}}</td>
+            <td class="px-6 py-2">{{pp.Amount}} {{pp.Currency}}</td>
+            <td class="px-6 py-2">{{pp.Debet}}</td>
+            <td class="px-6 py-2">{{pp.Credit}}</td>
+            <td class="px-6 py-2">{{pp.Employee}}</td>
+            <td class="px-6 py-2">{{pp.Department}}</td>
+            <td class="px-6 py-2">{{pp.Created}}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</html>

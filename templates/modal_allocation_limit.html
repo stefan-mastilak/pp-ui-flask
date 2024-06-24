@@ -1,0 +1,38 @@
+<!---------------------------------->
+<!-- MAX ALLOCATION WARNING MODAL -->
+<!---------------------------------->
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header-warning">
+                <button id="close_max_alloc_info_modal_btn"
+                        onclick="hideMaxAllocInfoModal('{{guid}}')"
+                        type="button"
+                        style="float: right;">
+                    <i class="fa fa-times"
+                       style="color: #BDBDBD; float: right; font-size: 22px; padding-right: 8px"
+                       onMouseOver="this.style.color='orange'"
+                       onMouseOut="this.style.color='#BDBDBD'"></i>
+                </button>
+                <h2 style="margin-left: 30px">Tildelingsgrense</h2>
+            </div>
+            <div class="centered-container">
+                <div class="modal-body-warning">
+                    <h1 style="font-size: 20px; padding-top: 30px; color: rgba(107,114,128,1);">Tildeling oversteg 100%</h1>
+                    <i class="fa fa-exclamation-triangle" style="font-size: 50px; padding-top:25px; padding-bottom:25px; color: orange"></i>
+                    <h1 style="font-size: 20px; padding-top: 10px; padding-bottom: 10px; color: rgba(107,114,128,1);">Send inn-operasjon deaktivert <br>Vennligst juster tildeling og fortsett</h1>
+                </div>
+            </div>
+            <div class="modal-footer text-center">
+                <button onclick="hideMaxAllocInfoModal('{{guid}}')"
+                        class="edit-modal-button"
+                        onMouseOver="this.style.color='orange'"
+                        onMouseOut="this.style.color='white'">Lukke
+                </button>
+            </div>
+        </div>
+    </div>
+
+<!--------------------------------------->
+<!-- END /MAX ALLOCATION WARNING MODAL -->
+<!--------------------------------------->

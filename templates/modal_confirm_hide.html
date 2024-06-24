@@ -1,0 +1,48 @@
+<!-- templates/modal_confirm_hide.html -->
+
+<!-- MODAL TO SHOW AFTER CONFIRMATION OF HIDE PROJECT OPERATION -->
+
+<div class="modal-overlay" id="confirm-hide-overlay-{{pid}}">
+    <div id="confirm_hide_project_modal_{{pid}}"
+         class="modal modal-hide fade">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header-info text-center d-block">
+                  <button name="{{pid}}"
+                          onclick="closeConfirmHideModal(name); removeProjectFromTable(name);"
+                          type="button"
+                          class="confirm_close_hide_project_modal_btn"
+                          style="float: right;">
+                      <i class="fa fa-times"
+                       style="color: #BDBDBD; float: right; font-size: 22px; padding-right: 8px"
+                       onMouseOver="this.style.color='#10AB4D'"
+                         onMouseOut="this.style.color='#BDBDBD'"></i>
+                  </button>
+                  <h2 style="margin-left: 30px">{{project_name}}</h2>
+              </div>
+              <div class="modal-body-hide-confirm-{{pid}} modal-body">
+                    <div class="centered-container">
+                        <div class="hide-modal-content">
+                            <div class="modal-body-hide-confirm">
+                                <h1 style="font-size: 20px; padding-top: 10px; padding-bottom: 25px">Skjul prosjekt</h1>
+                                <i class="fa fa-check-circle"
+                                   style="font-size: 45px; color: #10AB4D; padding-bottom: 25px"></i>
+                                <h1 style="font-size: 18px; padding-bottom: 10px">
+                                    Prosjektet <b>{{number}}</b> er skjult fra prosjektlisten.
+                                </h1>
+                            </div>
+                        </div>
+                    </div>
+              </div>
+              <div class="modal-footer text-center">
+                <button name="{{pid}}"
+                        type="button"
+                        class="btn btn-default cancel_hide_project hide-modal-button"
+                        onclick="closeConfirmHideModal(name); markAsHidden(name, '{{user_email}}');"
+                        onMouseOver="this.style.color='#10AB4D'"
+                        onMouseOut="this.style.color='white'">Ok</button>
+              </div>
+          </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,61 @@
+<!-- templates/modal_hide.html -->
+
+<!-- MODAL TO HIDE PROJECT -->
+
+<div class="modal-overlay" id="hide-overlay-{{pid}}">
+    <div id="hide_project_modal_{{pid}}"
+         class="modal modal-hide fade">
+      <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header-info text-center d-block">
+                <button name="{{pid}}"
+                        onclick="closeHideModal(name)"
+                        type="button"
+                        class="close_hide_project_modal_btn"
+                        style="float: right;">
+                    <i class="fa fa-times"
+                       style="color: #BDBDBD; float: right; font-size: 22px; padding-right: 8px"
+                       onMouseOver="this.style.color='orange'"
+                       onMouseOut="this.style.color='#BDBDBD'"></i>
+                </button>
+                <h2 style="margin-left: 30px">{{project.name}}</h2>
+            </div>
+
+            <div class="modal-body-hide-{{pid}} modal-body">
+                <div class="centered-container">
+                    <div class="hide-modal-content">
+                        <div class="modal-body-hide">
+                            <h1 style="font-size: 20px; padding-top: 10px; padding-bottom: 22px">Skjul prosjekt</h1>
+                            <i class="fa fa-eye-slash fa-fw fa-lg hover:text-green-800" style="font-size: 45px"></i>
+                            <h1 style="font-size: 18px; padding-top: 22px;">
+                                Er du sikker på at du vil skjule prosjektet <b>{{pid}}</b>?
+                            </h1>
+                            <br>
+                            <h1 style="font-size: 18px; padding-bottom: 10px">
+                                Prosjektet skjules fra listen, men kan hentes frem senere.
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer text-center">
+                <button id="confirm_hide_project_btn_{{pid}}"
+                        data-pid="{{pid}}"
+                        data-ue="{{user_email}}"
+                        type="button"
+                        class="confirm_hide_project btn btn-success to-show-spinner hide-modal-button"
+                        onMouseOver="this.style.color='#10AB4D'"
+                        onMouseOut="this.style.color='white'">Ja</button>
+                <button id="cancel_hide_project_btn"
+                        name="{{pid}}"
+                        type="button"
+                        class="btn btn-default cancel_hide_project hide-modal-button"
+                        onclick="closeHideModal(name)"
+                        onMouseOver="this.style.color='orange'"
+                        onMouseOut="this.style.color='white'">Nei</button>
+            </div>
+
+          </div>
+      </div>
+    </div>
+</div>

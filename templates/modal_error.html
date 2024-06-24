@@ -1,0 +1,42 @@
+<!--------------------------------------->
+<!--------- DISPLAY ERRORS MODAL -------->
+<!--------------------------------------->
+<div class="modal-overlay" id="overlay">
+    <div class="modal modal-error" id="errorModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header-error">
+                    <h2 id="error-modal-header-title" class="modal-title">Feil</h2>
+                    <button id="close_error_modal_btn"
+                            onclick="closeErrorModal()"
+                            type="button"
+                            style="float: right;">
+                        <i class="fa fa-times"
+                           style="color: #BDBDBD; float: right; font-size: 22px; padding-right: 8px; margin-top: -25px;"
+                           onMouseOver="this.style.color='orange'"
+                           onMouseOut="this.style.color='#BDBDBD'"></i>
+                    </button>
+                </div>
+                <div class="centered-container">
+                    <div class="modal-body-error">
+                        <h1 id="error-message" style="padding-top: 20px; padding-bottom: 20px"></h1>
+                        <h1 id="error-status-code" style="color: orange; font-family: monospace; font-size: 18px;"></h1>
+                        <h1 id="error-description" style="color: orange; font-family: monospace; font-size: 18px;"></h1>
+                        <h1 style="padding-top: 20px;">Vennligst lukk denne modalen og prøv igjen</h1>
+                        <h1 style="padding-bottom: 20px">Hvis problemet vedvarer, vennligst kontakt administratoren</h1>
+                    </div>
+                </div>
+                <div class="modal-footer text-center">
+                    <button onclick="closeErrorModal()"
+                            class="edit-modal-button"
+                            onMouseOver="this.style.color='orange'"
+                            onMouseOut="this.style.color='white'">Lukke
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--------------------------------------->
+<!--------- /DISPLAY ERRORS MODAL ------->
+<!--------------------------------------->
