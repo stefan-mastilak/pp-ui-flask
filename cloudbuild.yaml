@@ -1,0 +1,15 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'eu.gcr.io/$PROJECT_ID/pp-ui-app:$SHORT_SHA', '.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'eu.gcr.io/$PROJECT_ID/pp-ui-app:$SHORT_SHA']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: ['run',
+         'deploy',
+         'pp-ui-app',
+         '--region=europe-west1',
+         '--allow-unauthenticated',
+         '--port=8443', '--platform=managed',
+         '--image=eu.gcr.io/$PROJECT_ID/pp-ui-app:$SHORT_SHA']
+options:
+  logging: CLOUD_LOGGING_ONLY
