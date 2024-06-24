@@ -1,0 +1,14 @@
+**/.idea/
+**.xlsx
+**.parquet
+**.log
+**.csv
+.ipynb_checkpoints
+.pyc
+.DS_Store
+.env
+/iac/credentials
+**.tfstate
+**.tfstate.backup
+**.hcl
+/iac/terraform/.terraform/
